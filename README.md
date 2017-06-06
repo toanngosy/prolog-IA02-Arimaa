@@ -3,6 +3,7 @@ Project for IA02 - UTC - creating an AI to play Arimaa.
 
 Describing Piece:
 Piece: [Coordinate X, Coordinate Y, Type, Side]
+
 Coordinate: [Coordinate X, Coordinate Y]
 
 # Fundamental function
@@ -58,3 +59,4 @@ get_piece_at_coordinate(Piece, Coordinate)
 is_friendly(Piece1, Piece2)
 ```
 * Check if 2 Pieces same side.
+
