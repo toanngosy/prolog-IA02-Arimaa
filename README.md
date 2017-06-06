@@ -76,4 +76,5 @@ TO DO:
 --------------------------------------
 Try to Push the Enemy Piece to trap, if have chance
 Move the Rabbit as far as it can be
+Rabbit always go with stronger one
 
