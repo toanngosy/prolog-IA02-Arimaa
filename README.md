@@ -74,7 +74,8 @@ TO DO:
    * Implement Push/Pull
    * Cannot move Rabbit backward
 --------------------------------------
-Try to Push the Enemy Piece to trap, if have chance
+1st Push only if the Enemy Piece to trap, if have a chance -> check if gold near trap, gold near silver, there is no gold around the hole
+2nd Pull only there is no free place for goal to be available
 Move the Rabbit as far as it can be
 Rabbit always go with stronger one
 
