@@ -72,3 +72,8 @@ Receive (gamestate, board) ->
 TO DO:
 
    * Implement Push/Pull
+   * Cannot move Rabbit backward
+--------------------------------------
+Try to Push the Enemy Piece to trap, if have chance
+Move the Rabbit as far as it can be
+
