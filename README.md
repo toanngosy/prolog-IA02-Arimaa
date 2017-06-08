@@ -72,15 +72,11 @@ get_possible_one_step_moves(Coordinate, MovePossible).
 # Strategy to search for moves
 From observation: captured Piece of silver already in Gamestate - Why we need gamestate?
 
-Receive (gamestate, board) -> 
+Strategy:
 
-TO DO:
+Push if have a chance to delete Gold Piece out of the Board
 
-   * Implement Push/Pull
-   * Cannot move Rabbit backward
---------------------------------------
-1st Push only if the Enemy Piece to trap, if have a chance -> check if gold near trap, gold near silver, there is no gold around the hole
-2nd Pull only there is no free place for goal to be available
-Move the Rabbit as far as it can be
-Rabbit always go with stronger one
+Pull when approach the goal and can pull the piece out
+
+If not, move a Rabbit with a Stronger Piece, move it until cannot move, then with another rabbit.
 
