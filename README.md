@@ -68,7 +68,10 @@ get_possible_one_step_moves(Coordinate, MovePossible).
 ```
 * Return the moves (of one step) reachable from Coordinate 
 
-
+```prolog
+get_piece_order_by_row_desc(Board, Type, Side, Res).
+```
+* Return pieces of type=Type and side=Side order by row in descending order (the closest to the gold side first). 
 # Strategy to search for moves
 From observation: captured Piece of silver already in Gamestate - Why we need gamestate?
 
