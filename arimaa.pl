@@ -148,7 +148,16 @@ is_frozen(Coordinate) :- get_piece_at_coordinate(P, Coordinate), is_not_empty_li
 							
 %same_coordinates(a, b) 
 same_coordinates(C1, C2) :- get_x(C1,X1), get_y(C1,Y1), get_x(C2,X2), get_y(C2,Y2), X1 =:= X2, Y1 =:= Y2.
- 
+
+%get_piece_from_side(Board, Side, SidePiece)
+get_piece_from_side([[Row, Col, Type, Side]|B], Side,[[Row, Col, Type, Side]|Q]) :- get_piece_from_side(B, Side, Q), !.
+get_piece_from_side([_|B], Side, Q) :- get_piece_from_side(B, Side, Q).
+get_piece_from_side([], Side, []).
+
+%get_piece_from_type(B, Type, Res)
+get_piece_from_type([[Row, Col, Type, Side]|B], Type, [[Row, Col, Type, Side]|Q]) :- get_piece_from_type(B, Type, Q), !.
+get_piece_from_type([_|B], Type, Q) :- get_piece_from_type(B, Type, Q).
+get_piece_from_type([], Type, []).
 
 %:- dynamic moves/1.
 add_move(NewMove) :-  moves(M), retract(moves(M)), asserta(moves([NewMove|M])).
