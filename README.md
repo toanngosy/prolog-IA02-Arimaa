@@ -63,6 +63,11 @@ is_friendly(Piece1, Piece2).
 is_frozen(Coordinate).
 ```
 * True if the Piece is frozen.
+```prolog
+get_possible_one_step_moves(Coordinate, MovePossible).
+```
+* Return the moves (of one step) reachable from Coordinate 
+
 
 # Strategy to search for moves
 From observation: captured Piece of silver already in Gamestate - Why we need gamestate?
