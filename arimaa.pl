@@ -150,6 +150,34 @@ is_frozen(Coordinate) :- get_piece_at_coordinate(P, Coordinate), is_not_empty_li
 same_coordinates(C1, C2) :- get_x(C1,X1), get_y(C1,Y1), get_x(C2,X2), get_y(C2,Y2), X1 =:= X2, Y1 =:= Y2.
  
 
+%:- dynamic moves/1.
+add_move(NewMove) :-  moves(M), retract(moves(M)), asserta(moves([NewMove|M])).
+ 
+%call get_possible_one_step_moves with the chosen move to generate move of 2 or more steps 
+get_possible_one_step_moves(Cood, MovePossible) :- get_one_step_moves(Cood, Moves), get_possible_one_step_moves(Cood, Moves, MovePossible), !.
+%get_possible_one_step_moves(Cood, Moves, MovePossible)
+get_possible_one_step_moves(_, [], []).								
+get_possible_one_step_moves([X,Y], [T|MovesInit], [T|MovePossible]) :-  get_piece_at_coordinate(Piece, T), is_empty_list(Piece), 
+								is_in_trap(T), is_near_ally(T), get_possible_one_step_moves([X,Y], MovesInit, MovePossible), !.									
+get_possible_one_step_moves([X,Y], [T|MovesInit], [T|MovePossible]) :- get_piece_at_coordinate(Piece, T), is_empty_list(Piece), \+is_in_trap(T), 
+								get_possible_one_step_moves([X,Y], MovesInit, MovePossible),!.								
+get_possible_one_step_moves([X,Y], [T|MovesInit], [T|MovePossible]) :- get_piece_at_coordinate([_, _, TypeNei, SideNei], T), Side = gold, 
+								get_piece_at_coordinate([_, _, Type, Side], [X,Y]), is_stronger(Type, TypeNei), 
+								get_possible_one_step_moves([X,Y], MovesInit, MovePossible), !.								
+get_possible_one_step_moves([X,Y], [T|MovesInit], MovePossible) :- get_possible_one_step_moves([X,Y], MovesInit, MovePossible).
+
+%get_one_step_moves(Cood, Moves)
+get_one_step_moves([X,Y], Moves) :- get_south_move([X,Y], S), get_north_move([X,Y], N), get_east_move([X,Y], E), get_west_move([X,Y], W),
+								asserta(moves([])), add_move(S), add_move(N), add_move(E), add_move(W), moves(Temp), deleteElements([], Temp, Moves).
+								
+get_south_move([X,Y], [Xres, Yres]) :- south(Direction), get_x(Direction, XD), get_y(Direction, YD), Xres is X+XD, Yres is Y+YD,in_board([Xres, Yres]),!. 
+get_south_move(_,[]).
+get_north_move([X,Y], [Xres, Yres]) :- north(Direction), get_x(Direction, XD), get_y(Direction, YD), Xres is X+XD, Yres is Y+YD,in_board([Xres, Yres]),!.
+get_north_move(_,[]).
+get_east_move([X,Y], [Xres, Yres]) :- east(Direction), get_x(Direction, XD), get_y(Direction, YD), Xres is X+XD, Yres is Y+YD,in_board([Xres, Yres]),!.
+get_east_move(_,[]).
+get_west_move([X,Y], [Xres, Yres]) :- get_piece_at_coordinate([_, _, Type, _], [X,Y]), Type \= rabbit, west(Direction), get_x(Direction, XD), get_y(Direction, YD), Xres is X+XD, Yres is Y+YD,in_board([Xres, Yres]),!.
+get_west_move(_,[]).
 
 
 
