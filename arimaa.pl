@@ -82,6 +82,12 @@ is_horse([_,_,horse,_]).
 is_camel([_,_,camel,_]).
 is_elephant([_,_,elephant,_]).
 
+%Piece side
+ally(silver).
+enemy(gold).
+side([_,_,_,X], X).
+
+
 %force(Piece,F) --- return Piece Force 
 force([_,_,rabbit,_], 1).
 force([_,_,cat,_], 2).
@@ -233,7 +239,40 @@ get_west_move(_,[]).
 
 %test(X, Side) :- board(B), get_max_row_piece(B, Side, X).
 
- 
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%% PUSH MOVE %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+is_enemy_near_trap([X,Y, _, Side], TrapHole) :- enemy(Side), directions(Directions), traps(Traps), isen([X,Y], Directions, Traps, TrapHole).
+isen(_, [], _, _) :- !, fail.
+isen([X,Y], [[Xd, Yd]|_], Traps, [Xt, Yt]) :- Xt is X+Xd, Yt is Y+Yd, member([Xt, Yt], Traps), !.
+isen([X,Y], [[Xd, Yd]|Q], Traps, Trap) :- Xt is X+Xd, Yt is Y+Yd, \+member([Xt, Yt], Traps), isen([X,Y], Q, Traps, Trap).
+
+count_enemy_piece_around_trap(TrapHole, N) :- directions(Directions), cgpat(TrapHole, Directions, N), !.
+cgpat(_, [], 0) :- !.
+cgpat(TrapHole, [Hd|Td], N) :- get_neighbour(Piece, TrapHole, Hd), is_empty_list(Piece), cgpat(TrapHole, Td, N).
+cgpat(TrapHole, [Hd|Td], N) :- get_neighbour(Piece, TrapHole, Hd), 
+								is_not_empty_list(Piece), side(Piece, Side), ally(Side), cgpat(TrapHole, Td, N).
+cgpat(TrapHole, [Hd|Td], N) :- get_neighbour(Piece, TrapHole, Hd), 
+								is_not_empty_list(Piece), side(Piece, Side), enemy(Side), cgpat(TrapHole, Td, M), N is M+1.  
+
+neighbour_silver_stronger(PieceVictim, PiecePush) :- directions(Directions), nss(PieceVictim, PiecePush, Directions).
+nss(_, [], []) :- !.
+nss(PieceVictim, PiecePush, [Hd|_]) :- get_coordination(PieceVictim, Cv), get_neighbour(PiecePush, Cv, Hd), is_not_empty_list(PiecePush), 
+										side(PiecePush, Side), ally(Side), is_stronger(PiecePush, PieceVictim), !. 
+nss(PieceVictim, PiecePush, [_|Td]) :- nss(PieceVictim, PiecePush, Td).
+
+is_pushable(PieceVictim, PiecePush) :- is_enemy_near_trap(PieceVictim, TrapHole), count_enemy_piece_around_trap(TrapHole, N), N =:= 1,
+										neighbour_silver_stronger(PieceVictim, PiecePush).
+
+push_detect(Victim, Push) :- board(Board), enemy(Side), get_piece_from_side(Board, Side, TotalPiece), pd(Victim, Push, TotalPiece).
+pd(_, _, []) :- !, fail.
+pd(Victim, Push, [Victim|_]) :- is_pushable(Victim, Push), is_not_empty_list(Push),!.
+pd(Victim, Push, [_|Q]) :- pd(Victim, Push, Q).
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%% APPEL A PUSH MOVE %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%move_push(M) :- asserta(moves([])), push_detect(Victim, Push), is_enemy_near_trap(Victim, TrapHole), get_coordination(Victim, Vc), get_coordination(Push, Pc), add_move([Pc, Vc]), add_move([Vc, TrapHole]), moves(M).
 
 
 
