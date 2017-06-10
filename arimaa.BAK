@@ -1,17 +1,15 @@
 :- module(bot,
       [  get_moves/3
       ]).
-	
+        
 % A few comments but all is explained in README of github
 
 % get_moves signature
-% get_moves(Moves, gamestate, board).
+%get_moves(Moves, gamestate, board).
 
 % Exemple of variable
 % gamestate: [side, [captured pieces]] (e.g. [silver, [ [0,1,rabbit,silver],[0,2,horse,silver] ]) 
 % board: [[0,0,rabbit,silver],[0,1,rabbit,silver],[0,2,horse,silver],[0,3,rabbit,silver],[0,4,elephant,silver],[0,5,rabbit,silver],[0,6,rabbit,silver],[0,7,rabbit,silver],[1,0,camel,silver],[1,1,cat,silver],[1,2,rabbit,silver],[1,3,dog,silver],[1,4,rabbit,silver],[1,5,horse,silver],[1,6,dog,silver],[1,7,cat,silver],[2,7,rabbit,gold],[6,0,cat,gold],[6,1,horse,gold],[6,2,camel,gold],[6,3,elephant,gold],[6,4,rabbit,gold],[6,5,dog,gold],[6,6,rabbit,gold],[7,0,rabbit,gold],[7,1,rabbit,gold],[7,2,rabbit,gold],[7,3,cat,gold],[7,4,dog,gold],[7,5,rabbit,gold],[7,6,horse,gold],[7,7,rabbit,gold]]
-
-board([[0,0,rabbit,silver],[0,1,rabbit,silver],[0,2,horse,silver],[0,3,rabbit,silver],[0,4,elephant,silver],[0,5,rabbit,silver],[0,6,rabbit,silver],[0,7,rabbit,silver],[1,0,camel,silver],[1,1,cat,silver],[1,2,rabbit,silver],[1,3,dog,silver],[1,4,rabbit,silver],[1,5,horse,silver],[1,6,dog,silver],[1,7,cat,silver],[2,7,rabbit,gold],[6,0,cat,gold],[6,1,horse,gold],[6,2,camel,gold],[6,3,elephant,gold],[6,4,rabbit,gold],[6,5,dog,gold],[6,6,rabbit,gold],[7,0,rabbit,gold],[7,1,rabbit,gold],[7,2,rabbit,gold],[7,3,cat,gold],[7,4,dog,gold],[7,5,rabbit,gold],[7,6,horse,gold],[7,7,rabbit,gold]]).
 
 % Call exemple:
 % get_moves(Moves, [silver, []], [[0,0,rabbit,silver],[0,1,rabbit,silver],[0,2,horse,silver],[0,3,rabbit,silver],[0,4,elephant,silver],[0,5,rabbit,silver],[0,6,rabbit,silver],[0,7,rabbit,silver],[1,0,camel,silver],[1,1,cat,silver],[1,2,rabbit,silver],[1,3,dog,silver],[1,4,rabbit,silver],[1,5,horse,silver],[1,6,dog,silver],[1,7,cat,silver],[2,7,rabbit,gold],[6,0,cat,gold],[6,1,horse,gold],[6,2,camel,gold],[6,3,elephant,gold],[6,4,rabbit,gold],[6,5,dog,gold],[6,6,rabbit,gold],[7,0,rabbit,gold],[7,1,rabbit,gold],[7,2,rabbit,gold],[7,3,cat,gold],[7,4,dog,gold],[7,5,rabbit,gold],[7,6,horse,gold],[7,7,rabbit,gold]]).
@@ -21,6 +19,9 @@ board([[0,0,rabbit,silver],[0,1,rabbit,silver],[0,2,horse,silver],[0,3,rabbit,si
 %get_type([_,_,Y,_], Y).
 
 %get_moves([[[2,0],[3,0]],[[1,0],[2,0]],[[1,1],[2,1]],[[2,1],[2,2]]], Gamestate, Board).
+
+board([[0,0,rabbit,silver],[0,1,rabbit,silver],[0,2,horse,silver],[0,3,rabbit,silver],[0,4,elephant,silver],[0,5,rabbit,silver],[0,6,rabbit,silver],[0,7,rabbit,silver],[1,0,camel,silver],[1,1,cat,silver],[1,2,rabbit,silver],[1,3,dog,silver],[1,4,rabbit,silver],[1,5,horse,silver],[1,6,dog,silver],[1,7,cat,silver],[2,7,rabbit,gold],[6,0,cat,gold],[6,1,horse,gold],[6,2,camel,gold],[6,3,elephant,gold],[6,4,rabbit,gold],[6,5,dog,gold],[6,6,rabbit,gold],[7,0,rabbit,gold],[7,1,rabbit,gold],[7,2,rabbit,gold],[7,3,cat,gold],[7,4,dog,gold],[7,5,rabbit,gold],[7,6,horse,gold],[7,7,rabbit,gold]]).
+
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%fundamental function%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -38,10 +39,12 @@ is_empty_list(L) :- listLength(L, Length), Length = 0.
 %is not empty list
 is_not_empty_list(L) :- listLength(L, Length), Length =\= 0.
 
+%deleteElement : delete the first occurence of the element
 deleteElement(_, [], []).
 deleteElement(X,[X|Q],Q).
 deleteElement(X,[T|Q],[T|R]):-deleteElement(X,Q,R).
 
+%deleteElement : delete all occurences of the element
 deleteElements(X, L, L):- \+ member(X,L).
 deleteElements(X, L, R):-deleteElement(X,L,R1), deleteElements(X,R1,R).
 
@@ -79,6 +82,12 @@ is_horse([_,_,horse,_]).
 is_camel([_,_,camel,_]).
 is_elephant([_,_,elephant,_]).
 
+%Piece side
+ally(silver).
+enemy(gold).
+side([_,_,_,X], X).
+
+
 %force(Piece,F) --- return Piece Force 
 force([_,_,rabbit,_], 1).
 force([_,_,cat,_], 2).
@@ -106,7 +115,7 @@ get_coordination([X, Y], [X, Y]).
 get_coordination([X, Y, _, _], [X, Y]).
 
 %is in trap
-is_in_trap(Coordinate) :- traps(Trap), member(Coordinate,Trap),!. 
+is_in_trap(Coordinate) :- traps(Trap), member(Coordinate,Trap),!.
 
 %get_piece -> get piece from coordinate and Board - line 
 get_piece_at_coordinate(X, Coordinate) :- board(B), get_piece(X, Coordinate, B).
@@ -122,40 +131,40 @@ is_friendly([_,_,_,X], [_,_,_,X]).
 
 %get_neighbour_coordinate -> get coordinate on 1 direction (N or S or W or E) 
 get_neighbour_coordinate([X,Y], Coordinate, Direction) :- get_x(Coordinate, XC), get_y(Coordinate, YC), get_x(Direction, XD), get_y(Direction, YD),
-															A is XC+XD, B is YC+YD, in_board([A,B]), X is A, Y is B,!. 
+                                                                                                                        A is XC+XD, B is YC+YD, in_board([A,B]), X is A, Y is B,!.
 get_neighbour_coordinate([], _, _) :- !.  
 
 %get_neighbour -> get piece on that coordinate
 get_neighbour(Piece, Coordinate, Direction) :- get_neighbour_coordinate(NeiCoordinate, Coordinate, Direction), 
-												is_not_empty_list(NeiCoordinate), get_piece_at_coordinate(Piece, NeiCoordinate), 
-												is_not_empty_list(Piece),!.
+                                                                                                is_not_empty_list(NeiCoordinate), get_piece_at_coordinate(Piece, NeiCoordinate), 
+                                                                                                is_not_empty_list(Piece),!.
 get_neighbour([], _, _) :- !.
 
 %is_near_ally
 is_near_ally(Coordinate) :- directions(Directions), ina(Coordinate, Directions).
 ina(_,[]) :- fail, !.
 ina(Coordinate, [T|_]) :- get_piece_at_coordinate(P, Coordinate), is_not_empty_list(P),
-									get_neighbour(Nei, Coordinate, T), is_not_empty_list(Nei), is_friendly(Nei,P),!.
+                                                                        get_neighbour(Nei, Coordinate, T), is_not_empty_list(Nei), is_friendly(Nei,P),!.
 ina(Coordinate, [_|Q]) :- ina(Coordinate, Q). 
 
 %is_near_enemy_stronger
 is_near_enemy_stronger(Coordinate) :- directions(Directions), ines(Coordinate, Directions).
 ines(_,[]) :- fail, !.
 ines(Coordinate, [T|_]) :- get_piece_at_coordinate(P, Coordinate), is_not_empty_list(P),
-									get_neighbour(Nei, Coordinate, T), is_not_empty_list(Nei), \+is_friendly(Nei,P), is_stronger(Nei, P),!.
+                                                                        get_neighbour(Nei, Coordinate, T), is_not_empty_list(Nei), \+is_friendly(Nei,P), is_stronger(Nei, P),!.
 ines(Coordinate, [_|Q]) :- ines(Coordinate, Q). 
 
 %is_near_enemy_weaker
 is_near_enemy_weaker(Coordinate) :- directions(Directions), inew(Coordinate, Directions).
 inew(_,[]) :- fail, !.
 inew(Coordinate, [T|_]) :- get_piece_at_coordinate(P, Coordinate), is_not_empty_list(P),
-									get_neighbour(Nei, Coordinate, T), is_not_empty_list(Nei), \+is_friendly(Nei,P), is_stronger(P, Nei),!.
+                                                                        get_neighbour(Nei, Coordinate, T), is_not_empty_list(Nei), \+is_friendly(Nei,P), is_stronger(P, Nei),!.
 inew(Coordinate, [_|Q]) :- ines(Coordinate, Q). 
 
 %is_frozen
 is_frozen(Coordinate) :- get_piece_at_coordinate(P, Coordinate), is_not_empty_list(P), 
-							\+is_near_ally(Coordinate), is_near_enemy_stronger(Coordinate). 
-							
+                                                        \+is_near_ally(Coordinate), is_near_enemy_stronger(Coordinate). 
+                                                        
 %same_coordinates(a, b) 
 same_coordinates(C1, C2) :- get_x(C1,X1), get_y(C1,Y1), get_x(C2,X2), get_y(C2,Y2), X1 =:= X2, Y1 =:= Y2.
 
@@ -176,50 +185,50 @@ get_piece_from_row([], Row, []).
 
 %get_max_row_piece(B, Type, Side, Res)
 get_max_row_piece(B, Type, Side, Res) :- get_piece_from_side(B, Side, SPiece), get_piece_from_type(SPiece, Type, TSPiece),
-			get_max_row_piece2(8, TSPiece, Res).
-			
+                        get_max_row_piece2(8, TSPiece, Res).
+
 %get_max_row_piece(B, Side, Res)
 get_max_row_piece(B, Side, Res) :- get_piece_from_side(B, Side, SPiece),
-			get_max_row_piece2(8, SPiece, Res).
-			
+                        get_max_row_piece2(8, SPiece, Res).
+
 %get_max_row_piece2(Row, B, Res)
-get_max_row_piece2(Row, B, Res) :- Row < 0, fail,!.			
+get_max_row_piece2(Row, B, Res) :- Row < 0, fail,!.
 get_max_row_piece2(Row, B, Res) :- get_piece_from_row(B, Row, X), X\=[], Res = X, !.
 get_max_row_piece2(Row, B, Res) :- RowTmp is Row-1, get_max_row_piece2(RowTmp, B, Res).
 
 %get_piece_order_by_row_desc(B, Type, Side, Res)
 %Res = [T|Q] => T is the list of piece from B at max row
 get_piece_order_by_row_desc(B, Type, Side, Res) :- get_piece_from_side(B, Side, SPiece), get_piece_from_type(SPiece, Type, TSPiece),
-			get_piece_order_by_row_desc(8, TSPiece, ResTmp), deleteElements([], ResTmp, Res).
-get_piece_order_by_row_desc(Row, B, []) :- Row < 0,!.			
+                        get_piece_order_by_row_desc(8, TSPiece, ResTmp), deleteElements([], ResTmp, Res).
+get_piece_order_by_row_desc(Row, B, []) :- Row < 0,!.
 get_piece_order_by_row_desc(Row, B, [X|Res]) :- get_piece_from_row(B, Row, X), RowTmp is Row-1, get_piece_order_by_row_desc(RowTmp, B, Res).
 
 %get_strongest_neighbour
-%get_strongest_neighbour(Coord, Side, Nei) :- get_one_step_moves(Coord, NeiCases), !, 
+%get_strongest_neighbour(Coord, Side, Nei) :- get_one_step_moves(Coord, NeiCases), !,
 
-%:- dynamic moves/1.
+:- dynamic moves/1.
 add_move(NewMove) :-  moves(M), retract(moves(M)), asserta(moves([NewMove|M])).
- 
-%call get_possible_one_step_moves with the chosen move to generate move of 2 or more steps 
+
+%call get_possible_one_step_moves with the chosen move to generate move of 2 or more steps
 get_possible_one_step_moves(Cood, MovePossible) :- get_one_step_moves(Cood, Moves), get_possible_one_step_moves(Cood, Moves, MovePossible), !.
 
 %get_possible_one_step_moves(Cood, Moves, MovePossible)
 get_possible_one_step_moves([X,Y], _, []) :- is_frozen([X,Y]), !.
-get_possible_one_step_moves(_, [], []).								
-get_possible_one_step_moves([X,Y], [T|MovesInit], [T|MovePossible]) :-  get_piece_at_coordinate(Piece, T), is_empty_list(Piece), 
-								is_in_trap(T), is_near_ally(T), get_possible_one_step_moves([X,Y], MovesInit, MovePossible), !.									
-get_possible_one_step_moves([X,Y], [T|MovesInit], [T|MovePossible]) :- get_piece_at_coordinate(Piece, T), is_empty_list(Piece), \+is_in_trap(T), 
-								get_possible_one_step_moves([X,Y], MovesInit, MovePossible),!.								
-get_possible_one_step_moves([X,Y], [T|MovesInit], [T|MovePossible]) :- get_piece_at_coordinate([_, _, TypeNei, SideNei], T), Side = gold, 
-								get_piece_at_coordinate([_, _, Type, Side], [X,Y]), is_stronger(Type, TypeNei), 
-								get_possible_one_step_moves([X,Y], MovesInit, MovePossible), !.								
+get_possible_one_step_moves(_, [], []).
+get_possible_one_step_moves([X,Y], [T|MovesInit], [T|MovePossible]) :-  get_piece_at_coordinate(Piece, T), is_empty_list(Piece),
+                                                                is_in_trap(T), is_near_ally(T), get_possible_one_step_moves([X,Y], MovesInit, MovePossible), !.
+get_possible_one_step_moves([X,Y], [T|MovesInit], [T|MovePossible]) :- get_piece_at_coordinate(Piece, T), is_empty_list(Piece), \+is_in_trap(T),
+                                                                get_possible_one_step_moves([X,Y], MovesInit, MovePossible),!.
+get_possible_one_step_moves([X,Y], [T|MovesInit], [T|MovePossible]) :- get_piece_at_coordinate([_, _, TypeNei, SideNei], T), Side = gold,
+                                                                get_piece_at_coordinate([_, _, Type, Side], [X,Y]), is_stronger(Type, TypeNei),
+                                                                get_possible_one_step_moves([X,Y], MovesInit, MovePossible), !.
 get_possible_one_step_moves([X,Y], [T|MovesInit], MovePossible) :- get_possible_one_step_moves([X,Y], MovesInit, MovePossible).
 
 %get_one_step_moves(Cood, Moves)
 get_one_step_moves([X,Y], Moves) :- get_south_move([X,Y], S), get_north_move([X,Y], N), get_east_move([X,Y], E), get_west_move([X,Y], W),
-								asserta(moves([])), add_move(S), add_move(N), add_move(E), add_move(W), moves(Temp), deleteElements([], Temp, Moves).
-								
-get_south_move([X,Y], [Xres, Yres]) :- south(Direction), get_x(Direction, XD), get_y(Direction, YD), Xres is X+XD, Yres is Y+YD,in_board([Xres, Yres]),!. 
+                                                                asserta(moves([])), add_move(S), add_move(N), add_move(E), add_move(W), moves(Temp), deleteElements([], Temp, Moves).
+
+get_south_move([X,Y], [Xres, Yres]) :- south(Direction), get_x(Direction, XD), get_y(Direction, YD), Xres is X+XD, Yres is Y+YD,in_board([Xres, Yres]),!.
 get_south_move(_,[]).
 get_north_move([X,Y], [Xres, Yres]) :- north(Direction), get_x(Direction, XD), get_y(Direction, YD), Xres is X+XD, Yres is Y+YD,in_board([Xres, Yres]),!.
 get_north_move(_,[]).
@@ -228,8 +237,73 @@ get_east_move(_,[]).
 get_west_move([X,Y], [Xres, Yres]) :- get_piece_at_coordinate([_, _, Type, _], [X,Y]), Type \= rabbit, west(Direction), get_x(Direction, XD), get_y(Direction, YD), Xres is X+XD, Yres is Y+YD,in_board([Xres, Yres]),!.
 get_west_move(_,[]).
 
-%test(X, Row) :- board(B), get_piece_from_row(B, Row, X).
-test(X, Side) :- board(B), get_max_row_piece(B, Side, X).
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%% PUSH MOVE %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+is_enemy_near_trap([X,Y, _, Side], TrapHole) :- enemy(Side), directions(Directions), traps(Traps), isen([X,Y], Directions, Traps, TrapHole).
+isen(_, [], _, _) :- !, fail.
+isen([X,Y], [[Xd, Yd]|_], Traps, [Xt, Yt]) :- Xt is X+Xd, Yt is Y+Yd, member([Xt, Yt], Traps), !.
+isen([X,Y], [[Xd, Yd]|Q], Traps, Trap) :- Xt is X+Xd, Yt is Y+Yd, \+member([Xt, Yt], Traps), isen([X,Y], Q, Traps, Trap).
+
+count_enemy_piece_around_trap(TrapHole, N) :- directions(Directions), cgpat(TrapHole, Directions, N), !.
+cgpat(_, [], 0) :- !.
+cgpat(TrapHole, [Hd|Td], N) :- get_neighbour(Piece, TrapHole, Hd), is_empty_list(Piece), cgpat(TrapHole, Td, N).
+cgpat(TrapHole, [Hd|Td], N) :- get_neighbour(Piece, TrapHole, Hd), 
+                                                                is_not_empty_list(Piece), side(Piece, Side), ally(Side), cgpat(TrapHole, Td, N).
+cgpat(TrapHole, [Hd|Td], N) :- get_neighbour(Piece, TrapHole, Hd), 
+                                                                is_not_empty_list(Piece), side(Piece, Side), enemy(Side), cgpat(TrapHole, Td, M), N is M+1.  
+
+neighbour_silver_stronger(PieceVictim, PiecePush) :- directions(Directions), nss(PieceVictim, PiecePush, Directions).
+nss(_, [], []) :- !.
+nss(PieceVictim, PiecePush, [Hd|_]) :- get_coordination(PieceVictim, Cv), get_neighbour(PiecePush, Cv, Hd), is_not_empty_list(PiecePush), 
+                                                                                side(PiecePush, Side), ally(Side), is_stronger(PiecePush, PieceVictim), !. 
+nss(PieceVictim, PiecePush, [_|Td]) :- nss(PieceVictim, PiecePush, Td).
+
+is_pushable(PieceVictim, PiecePush) :- is_enemy_near_trap(PieceVictim, TrapHole), count_enemy_piece_around_trap(TrapHole, N), N =:= 1,
+                                                                                neighbour_silver_stronger(PieceVictim, PiecePush).
+
+push_detect(Victim, Push) :- board(Board), enemy(Side), get_piece_from_side(Board, Side, TotalPiece), pd(Victim, Push, TotalPiece).
+pd(_, _, []) :- !, fail.
+pd(Victim, Push, [Victim|_]) :- is_pushable(Victim, Push), is_not_empty_list(Push),!.
+pd(Victim, Push, [_|Q]) :- pd(Victim, Push, Q).
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%% APPEL A PUSH MOVE %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%move_push(M) :- asserta(moves([])), push_detect(Victim, Push), is_enemy_near_trap(Victim, TrapHole), get_coordination(Victim, Vc), get_coordination(Push, Pc), add_move([Pc, Vc]), add_move([Vc, TrapHole]), moves(M).
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%% MOVE RABBIT %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%move the closest rabbit of gold side which can move of Nbmove cases (or less if we reach the 7th row)
+move_rabbit(B, NbMove, []) :- NbMove =< 0, !.
+move_rabbit(B, NbMove, Move) :- NbMove > 0, get_piece_order_by_row_desc(B, rabbit, silver, Rabbits),
+    move_rabbit2(Rabbits, NbMove, MovedRabbit, MoveTmp), Move = [MovedRabbit, MoveTmp], !.
+
+move_rabbit2([[[X, Y, Type, Side]|Q1]|Q2], NbMove, MovedRabbit, MoveTmp):- move_rabbit3([X, Y], NbMove, MoveTmp2), MoveTmp2\=[], MovedRabbit = [X, Y],
+                                                                           MoveTmp = MoveTmp2, !.
+move_rabbit2([[_|Q1]|Q2], NbMove, MovedRabbit, MoveTmp):- move_rabbit2([Q1|Q2], NbMove, MovedRabbit, MoveTmp).
+move_rabbit2([[]|Q2], NbMove, MovedRabbit, MoveTmp):- move_rabbit2(Q2, NbMove, MovedRabbit, MoveTmp).
+move_rabbit2([[]], NbMove, [], []).
+
+move_rabbit3(Coord, NbMove, Coord) :- NbMove =< 0.
+move_rabbit3(Coord, NbMove, Coord):- Coord = [7,_].
+move_rabbit3(Coord, NbMove, MoveTmp) :- NbMove> 0, get_possible_one_step_moves(Coord, MovePossible), MovePossible \= [],
+    get_max_row_move(MovePossible, MaxRowMove), NewNbMove = NbMove-1, move_rabbit3(MaxRowMove, NewNbMove, MoveTmp).
+
+%get_max_row_move(MovePossible, MaxRowMove)
+get_max_row_move([[X,Y]|MovePossible], MaxRowMove) :- get_max_row_move(MovePossible, MaxRowMove, [X,Y], X).
+%get_max_row_move(MovePossible, MaxRowMove, MaxMoveTmp, Idx)
+get_max_row_move([], MaxRowMove, MaxMoveTmp, Idx) :- MaxRowMove=MaxMoveTmp.
+get_max_row_move([[X,Y]|MovePossible], MaxRowMove, MaxMoveTmp, Idx):- X>Idx, get_max_row_move(MovePossible, MaxRowMove, [X,Y], X).
+get_max_row_move([[X,Y]|MovePossible], MaxRowMove, MaxMoveTmp, Idx):- X=<Idx, get_max_row_move(MovePossible, MaxRowMove, MaxMoveTmp, X).
+
+%test(X, NbMove) :- board(B), move_rabbit(B, NbMove, X).
+
+% Doesn't work as it should.
+%get_moves([Move], Gamestate, Board):- move_rabbit(Board, 4, Move),!.
 
 
 
