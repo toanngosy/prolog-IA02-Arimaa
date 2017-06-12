@@ -5,6 +5,7 @@
 % A few comments but all is explained in README of github
 
 % get_moves signature
+%get_moves(Moves, gamestate, board).
 
 % Exemple of variable
 % gamestate: [side, [captured pieces]] (e.g. [silver, [ [0,1,rabbit,silver],[0,2,horse,silver] ]) 
@@ -19,7 +20,7 @@
 
 %get_moves([[[2,0],[3,0]],[[1,0],[2,0]],[[1,1],[2,1]],[[2,1],[2,2]]], Gamestate, Board).
 
-board([[0,0,rabbit,silver],[0,1,rabbit,silver],[0,2,horse,silver],[0,3,rabbit,silver],[0,4,elephant,silver],[0,5,rabbit,silver],[0,6,rabbit,silver],[0,7,rabbit,silver],[1,0,camel,silver],[1,1,cat,silver],[1,2,rabbit,silver],[1,3,dog,silver],[1,4,rabbit,silver],[1,5,horse,silver],[1,6,dog,silver],[1,7,cat,silver],[2,7,rabbit,gold],[6,0,cat,gold],[6,1,horse,gold],[6,2,camel,gold],[6,3,elephant,gold],[6,4,rabbit,gold],[6,5,dog,gold],[6,6,rabbit,gold],[7,0,rabbit,gold],[7,1,rabbit,gold],[7,2,rabbit,gold],[7,3,cat,gold],[7,4,dog,gold],[7,5,rabbit,gold],[7,6,horse,gold],[7,7,rabbit,gold]]).
+%board([[0,0,rabbit,silver],[0,1,rabbit,silver],[0,2,horse,silver],[0,3,rabbit,silver],[0,4,elephant,silver],[0,5,rabbit,silver],[0,6,rabbit,silver],[0,7,rabbit,silver],[1,0,camel,silver],[1,1,cat,silver],[1,2,rabbit,silver],[1,3,dog,silver],[1,4,rabbit,silver],[1,5,horse,silver],[1,6,dog,silver],[1,7,cat,silver],[2,7,rabbit,gold],[6,0,cat,gold],[6,1,horse,gold],[6,2,camel,gold],[6,3,elephant,gold],[6,4,rabbit,gold],[6,5,dog,gold],[6,6,rabbit,gold],[7,0,rabbit,gold],[7,1,rabbit,gold],[7,2,rabbit,gold],[7,3,cat,gold],[7,4,dog,gold],[7,5,rabbit,gold],[7,6,horse,gold],[7,7,rabbit,gold]]).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%fundamental function%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -46,6 +47,20 @@ deleteElement(X,[T|Q],[T|R]):-deleteElement(X,Q,R).
 %deleteElement : delete all occurences of the element
 deleteElements(X, L, L):- \+ member(X,L).
 deleteElements(X, L, R):-deleteElement(X,L,R1), deleteElements(X,R1,R).
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%dynamic predicates%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+:- dynamic moves/1.
+add_move(NewMove) :-  moves(M), retract(moves(M)), asserta(moves([NewMove|M])).
+
+:- dynamic board/1.
+%update_board(Move, newBoard)
+update_board([[ExRow,ExCol],[NewRow,NewCol]], [[NewRow,NewCol, Type,Side]|Btmp]) :-  board(B), deleteElement([ExRow,ExCol, Type,Side],B, Btmp), retract(board(B)), asserta(board([[NewRow,NewCol, Type,Side]|B])).
+%test(Move, X) :- asserta(board([[0,0,rabbit,silver],[0,1,rabbit,silver],[0,2,horse,silver],[0,3,rabbit,silver],[0,4,elephant,silver],[0,5,rabbit,silver],[0,6,rabbit,silver],[0,7,rabbit,silver],[1,0,camel,silver],[1,1,cat,silver],[1,2,rabbit,silver],[1,3,dog,silver],[1,4,rabbit,silver],[1,5,horse,silver],[1,6,dog,silver],[1,7,cat,silver],[2,7,rabbit,gold],[6,0,cat,gold],[6,1,horse,gold],[6,2,camel,gold],[6,3,elephant,gold],[6,4,rabbit,gold],[6,5,dog,gold],[6,6,rabbit,gold],[7,0,rabbit,gold],[7,1,rabbit,gold],[7,2,rabbit,gold],[7,3,cat,gold],[7,4,dog,gold],[7,5,rabbit,gold],[7,6,horse,gold],[7,7,rabbit,gold]])),
+%			update_board(Move, X).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%describing function%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -205,8 +220,6 @@ get_piece_order_by_row_desc(Row, B, [X|Res]) :- get_piece_from_row(B, Row, X), R
 %get_strongest_neighbour
 %get_strongest_neighbour(Coord, Side, Nei) :- get_one_step_moves(Coord, NeiCases), !,
 
-:- dynamic moves/1.
-add_move(NewMove) :-  moves(M), retract(moves(M)), asserta(moves([NewMove|M])).
 
 %call get_possible_one_step_moves with the chosen move to generate move of 2 or more steps
 get_possible_one_step_moves(Cood, MovePossible) :- get_one_step_moves(Cood, Moves), get_possible_one_step_moves(Cood, Moves, MovePossible), !.
