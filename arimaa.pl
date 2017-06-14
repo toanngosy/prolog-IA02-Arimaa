@@ -20,7 +20,7 @@
 
 %get_moves([[[2,0],[3,0]],[[1,0],[2,0]],[[1,1],[2,1]],[[2,1],[2,2]]], Gamestate, Board).
 
-%board([[0,0,rabbit,silver],[0,1,rabbit,silver],[0,2,horse,silver],[0,3,rabbit,silver],[0,4,elephant,silver],[0,5,rabbit,silver],[0,6,rabbit,silver],[0,7,rabbit,silver],[1,0,camel,silver],[1,1,cat,silver],[1,2,rabbit,silver],[1,3,dog,silver],[1,4,rabbit,silver],[1,5,horse,silver],[1,6,dog,silver],[1,7,cat,silver],[2,7,rabbit,gold],[6,0,cat,gold],[6,1,horse,gold],[6,2,camel,gold],[6,3,elephant,gold],[6,4,rabbit,gold],[6,5,dog,gold],[6,6,rabbit,gold],[7,0,rabbit,gold],[7,1,rabbit,gold],[7,2,rabbit,gold],[7,3,cat,gold],[7,4,dog,gold],[7,5,rabbit,gold],[7,6,horse,gold],[7,7,rabbit,gold]]).
+board([[0,0,rabbit,silver],[0,1,rabbit,silver],[0,2,horse,silver],[0,3,rabbit,silver],[0,4,elephant,silver],[0,5,rabbit,silver],[0,6,rabbit,silver],[0,7,rabbit,silver],[1,0,camel,silver],[1,1,cat,silver],[1,2,rabbit,silver],[1,3,dog,silver],[1,4,rabbit,silver],[1,5,horse,silver],[1,6,dog,silver],[1,7,cat,silver],[2,7,rabbit,gold],[6,0,cat,gold],[6,1,horse,gold],[6,2,camel,gold],[6,3,elephant,gold],[6,4,rabbit,gold],[6,5,dog,gold],[6,6,rabbit,gold],[7,0,rabbit,gold],[7,1,rabbit,gold],[7,2,rabbit,gold],[7,3,cat,gold],[7,4,dog,gold],[7,5,rabbit,gold],[7,6,horse,gold],[7,7,rabbit,gold]]).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%fundamental function%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -314,12 +314,26 @@ get_max_row_move([[X,Y]|MovePossible], MaxRowMove, MaxMoveTmp, Idx):- X=<Idx, ge
 
 %test(X, NbMove) :- board(B), move_rabbit(B, NbMove, X).
 
+% move_rabbit : to fix...
 %get_moves([Move], Gamestate, Board):- move_rabbit(Board, 4, Move),!.
 
+%get_movable_neighbour(CoordRabbit, Neighbour)
+%return the strongest neighbour who can move and who is not a rabbit
+get_movable_neighbour([X,Y], Neighbour) :- get_one_step_moves([X,Y], NeiCases), !, get_movable_neighbour([X,Y], Neighbor, NeiCases), 
+								get_stronger_neighbour(Neighbor, Neighbour).
+
+get_movable_neighbour([X,Y], [], []).
+get_movable_neighbour([X,Y], [T|Neighbors], [T|NeiCases]) :- get_piece_at_coordinate(P, T), P \= [], \+is_rabbit(P), get_possible_one_step_moves(T, Moves),  Moves \= [],
+								 get_movable_neighbour([X,Y], Neighbors, NeiCases), !.
+get_movable_neighbour([X,Y], Neighbors, [T|NeiCases]) :- get_movable_neighbour([X,Y], Neighbors, NeiCases), !.
 
 
+get_stronger_neighbour(Neighbor, Neighbor):- length(Neighbor) = 1, !.
+get_stronger_neighbour([T|Neighbor], Neighbour):- get_piece_at_coordinate([X, Y, Type, Side], T), force(Type, MaxForce), 
+								get_stronger_neighbour(Neighbor, Neighbour, MaxForce, T).
 
-
-
-
-
+get_stronger_neighbour([], MaxNei, MaxForce, MaxNei).
+get_stronger_neighbour([T|Neighbor], Neighbour, MaxForce, MaxNei):- get_piece_at_coordinate([X, Y, Type, Side], T), force(Type, Force),
+							Force < MaxForce, get_stronger_neighbour(Neighbor, Neighbour, MaxForce, MaxNei).
+get_stronger_neighbour([T|Neighbor], Neighbour, MaxForce, MaxNei):- get_piece_at_coordinate([X, Y, Type, Side], T), force(Type, Force),
+							Force > MaxForce, get_stronger_neighbour(Neighbor, Neighbour, Force, T).
