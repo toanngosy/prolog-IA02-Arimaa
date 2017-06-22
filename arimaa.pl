@@ -337,3 +337,8 @@ get_stronger_neighbour([T|Neighbor], Neighbour, MaxForce, MaxNei):- get_piece_at
 							Force < MaxForce, get_stronger_neighbour(Neighbor, Neighbour, MaxForce, MaxNei).
 get_stronger_neighbour([T|Neighbor], Neighbour, MaxForce, MaxNei):- get_piece_at_coordinate([X, Y, Type, Side], T), force(Type, Force),
 							Force > MaxForce, get_stronger_neighbour(Neighbor, Neighbour, Force, T).
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%pull_detect(Victim, Pull)
+pullable([7, Y, Typev, gold], [6, Y, Typep, silver]) :- board(Board), is_stronger(Typep, Typev), west(West), get_neighbour(Piece, [6,Y], West),
+															is_empty_list(Piece), !.
+pullable :- !,fail.
